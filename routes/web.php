@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/manage-roles', [AdminDashboardController::class, 'showManageRoles'])->name('manage.roles');
     Route::put('/admin/update-role/{user}', [AdminDashboardController::class, 'updateRole'])->name('update.role');
+    Route::delete('/users/{id}', [AdminDashboardController::class, 'destroy'])->name('delete.user');
 });
 
 // Jika menggunakan RoleController

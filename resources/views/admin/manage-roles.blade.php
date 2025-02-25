@@ -10,6 +10,13 @@
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                 <h1 class="text-2xl font-bold text-gray-800 mb-4">Daftar User</h1>
 
+                <!-- Pesan Sukses -->
+                @if (session('success'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                @endif
+
                 <table class="w-full border-collapse border border-gray-300">
                     <thead>
                         <tr class="bg-gray-200">
@@ -26,20 +33,30 @@
                                 <td class="border border-gray-300 px-4 py-2">{{ $user->email }}</td>
                                 <td class="border border-gray-300 px-4 py-2">{{ $user->role }}</td>
                                 <td class="border border-gray-300 px-4 py-2">
-                                    <form action="{{ route('update.role', $user->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
+                                    <div class="flex items-center">
+                                        <!-- Form untuk mengubah role -->
+                                        <form action="{{ route('update.role', $user->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <select name="role" class="border rounded">
+                                                <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
+                                                <option value="museum" {{ $user->role == 'museum' ? 'selected' : '' }}>Museum</option>
+                                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                            </select>
+                                            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded ml-2 hover:bg-green-600">
+                                                Ubah
+                                            </button>
+                                        </form>
 
-                                        <select name="role" class="border p-2 rounded">
-                                            <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
-                                            <option value="museum" {{ $user->role == 'museum' ? 'selected' : '' }}>Museum</option>
-                                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        </select>
-
-                                        <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded ml-2 hover:bg-green-600">
-                                            Ubah
-                                        </button>
-                                    </form>
+                                        <!-- Form untuk menghapus user -->
+                                        <form action="{{ route('delete.user', $user->id) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

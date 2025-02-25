@@ -35,5 +35,17 @@ class AdminDashboardController extends Controller
 
         return back()->with('success', 'Role berhasil diperbarui.');
     }
+
+    public function destroy($id)
+    {
+        // Cari user berdasarkan ID
+        $user = User::findOrFail($id);
+
+        // Hapus user
+        $user->delete();
+
+        // Redirect dengan pesan sukses
+        return redirect()->route('manage.roles')->with('success', 'User berhasil dihapus.');
+    }
 }
 
