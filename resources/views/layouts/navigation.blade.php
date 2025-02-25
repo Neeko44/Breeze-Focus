@@ -16,9 +16,13 @@
                         <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard Admin') }}
                         </x-responsive-nav-link>
-                    @else
+                    @elseif (Auth::user()->role === 'user')
                         <x-responsive-nav-link :href="route('user.dashboard')" :active="request()->routeIs('user.dashboard')">
                             {{ __('Dashboard User') }}
+                        </x-responsive-nav-link>
+                    @else
+                        <x-responsive-nav-link :href="route('museum.dashboard')" :active="request()->routeIs('user.dashboard')">
+                            {{ __('Dashboard Museum') }}
                         </x-responsive-nav-link>
                     @endif
                 </div>

@@ -25,9 +25,6 @@ class User extends Authenticatable
         'role',
         'id_museum',
     ];
-
-
-
     public function setRoleAttribute($value)
     {
         $this->attributes['role'] = $value;
