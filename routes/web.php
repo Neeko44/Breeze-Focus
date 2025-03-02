@@ -4,12 +4,20 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\MuseumDashboardController;
+use App\Http\Controllers\artworkController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::resource('/artwork', artworkController::class);
+
+Route::get('/artwork/create', [artworkController::class, 'create'])->name('artwork.create');
+Route::get('/artwork/{artwork}', [artworkController::class, 'show'])->name('artwork.show');
+Route::get('/artwork/{artwork}/edit', [artworkController::class, 'edit'])->name('artwork.edit');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
@@ -26,9 +34,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/users/{id}', [AdminDashboardController::class, 'destroy'])->name('delete.user');
 });
 
-// Jika menggunakan RoleController
-//Route::patch('/role/update/{user}', [RoleController::class, 'updateRole'])->name('role.update');
-
 Route::middleware('auth')->group(function () {
     Route::put('/profile/photo-update', [ProfileController::class, 'updatePhoto'])->name('profile.update.photo');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -42,4 +47,4 @@ Route::post('/logout', function () {
 })->name('logout');
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
