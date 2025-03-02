@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'id_museum',
+        'photo'
     ];
     public function setRoleAttribute($value)
     {
@@ -60,5 +61,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // app/Models/User.php
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar ? asset('storage/' . $this->avatar) : asset('images/default-avatar.png');
     }
 }
