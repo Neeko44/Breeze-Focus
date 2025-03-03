@@ -16,6 +16,12 @@
                     Kelola Role User
                 </a>
 
+                <!-- Link ke halaman ubah role -->
+                <a href="{{ route('artwork.index') }}"
+                   class="inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                    Unggah Artwork
+                </a>
+
                 <!-- Logout -->
                 <a href="{{ route('logout') }}"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

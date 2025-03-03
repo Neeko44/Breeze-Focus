@@ -3,111 +3,118 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\artwork;
+use App\Models\Artwork;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 
-class artworkController extends Controller
+class ArtworkController extends Controller
 {
-    //-----------------------------------------------------------------------------------------------------------//
-
     public function index()
     {
-        $artwork = artwork::orderBy('id', 'asc')->paginate(12);
-        return view('artwork.index', compact('artwork'));
+        $artworks = Artwork::orderBy('ID_ARTWORK', 'asc')->paginate(12);
+        return view('artwork.index', compact('artworks'));
     }
 
-    //-----------------------------------------------------------------------------------------------------------//
-
-    public function store(Request $request): RedirectResponse
+    public function create(Request $request): RedirectResponse
     {
-        $this->validate($request, [
-            'judul_artwork' => 'required|string|max:255',
-            'gambar_artwork' => 'required|image|mimes:jpeg,jpg,png|max:2048',
-            'artist_artwork' => 'required|string',
-            'deskripsi_artwork' => 'required|string',
-            'date_artwork' => 'required|date',
-            'category_artwork' => 'required|string',
+        // Validasi input sebelum menyimpan ke database
+        $validatedData = $request->validate([
+            'JUDUL_ARTWORK' => 'required|string|max:255',
+            'IMAGE_ARTWORK' => 'required|image|mimes:jpeg,jpg,png|max:2048',
+            'ARTIST_ARTWORK' => 'required|string|max:255',
+            'DESKRIPSI_ARTWORK' => 'required|string',
+            'DATE_ARTWORK' => 'required|date',
+            'CATEGORY_ARTWORK' => 'required|string|max:255',
         ]);
 
-        $image = $request->file('image');
-        $imagePath = $image->storeAs('public/artwork', $image->hashName());
-
-        if ($imagePath) {
-            artwork::create([
-                'image' => $image->hashName(),
-                'nama' => $request->input('nama'),
-                'kategori' => $request->input('kategori'),
-                'harga' => $request->input('harga'),
-                'deskripsi' => $request->input('deskripsi'),
-                'lokasi' => $request->input('lokasi'),
-                'stok' => $request->input('stok'),
-                'tgl_beli' => $request->input('tgl_beli'),
-                'tgl_masuk' => $request->input('tgl_masuk'),
-            ]);
-
-            return redirect()->route('artwork.index')->with(['success' => 'Data sukses disimpan.']);
+        // Simpan gambar ke storage
+        if ($request->hasFile('IMAGE_ARTWORK')) {
+            $file = $request->file('IMAGE_ARTWORK');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/artworks', $filename,'public'); // Simpan di storage/app/public/
+            $imagePath = 'storage/uploads/artworks/' . $filename; // Simpan path yang bisa diakses
         } else {
-            return redirect()->back()->with(['error' => 'Image upload failed.']);
+            $imagePath = null;
         }
+
+        // Tambahkan path gambar ke data yang sudah divalidasi
+        $validatedData['IMAGE_ARTWORK'] = $imagePath;
+
+        // Simpan data ke database
+        $artwork = Artwork::create($validatedData);
+
+        // Debugging: Cek apakah data tersimpan
+        if (!$artwork) {
+            return back()->with('error', 'Data gagal disimpan.');
+        }
+
+        return redirect()->route('artwork.index')->with('success', 'Data berhasil disimpan.');
     }
 
-    //-----------------------------------------------------------------------------------------------------------//
 
-    public function edit(string $id)
+
+    public function edit($id)
     {
-        $artwork = artwork::findOrFail($id);
+        $artwork = Artwork::findOrFail($id);
         return view('artwork.edit', compact('artwork'));
     }
 
-    //-----------------------------------------------------------------------------------------------------------//
-
     public function update(Request $request, $id): RedirectResponse
     {
-        $this->validate($request, [
-            'judul_artwork' => 'required|string|max:255',
-            'gambar_artwork' => 'required|image|mimes:jpeg,jpg,png|max:2048',
-            'artist_artwork' => 'required|string',
-            'deskripsi_artwork' => 'required|string',
-            'date_artwork' => 'required|date',
-            'category_artwork' => 'required|string',
+        $request->validate([
+            'JUDUL_ARTWORK' => 'required|string|max:255',
+            'IMAGE_ARTWORK' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'ARTIST_ARWORK' => 'required|string|max:255',
+            'DESKRIPSI_ARTWORK' => 'required|string',
+            'DATE_ARTWORK' => 'required|date',
+            'CATEGORY_ARTWORK' => 'required|string|max:255',
         ]);
 
-        $artwork = artwork::findOrFail($id);
+        $artwork = Artwork::findOrFail($id);
 
-        if ($request->hasFile('image')) {
+        // Periksa apakah ada gambar baru yang diupload
+        if ($request->hasFile('IMAGE_ARTWORK')) {
+            // Hapus gambar lama jika ada
+            if ($artwork->image) {
+                Storage::delete('public/images/' . $artwork->image);
+            }
 
-            $image = $request->file('image');
-            $image->storeAs('public/artwork', $image->hashName());
+            // Simpan gambar baru
+            $image = $request->file('IMAGE_ARTWORK');
+            $imagePath = $image->store('public/images');
 
-            Storage::delete('public/artwork/' . $artwork->image);
-
+            // Update data dengan gambar baru
             $artwork->update([
-                'image' => $image->hashName(),
-                'nama' => $request->input('nama'),
-                'kategori' => $request->input('kategori'),
-                'harga' => $request->input('harga'),
-                'deskripsi' => $request->input('deskripsi'),
-                'lokasi' => $request->input('lokasi'),
-                'stok' => $request->input('stok'),
-                'tgl_beli' => $request->input('tgl_beli'),
-                'tgl_masuk' => $request->input('tgl_masuk'),
+                'IMAGE_ARTWORK' => $imagePath,
+                'JUDUL_ARTWORK' => $request->JUDUL_ARTWORK,
+                'CATEGORY_ARTWORK' => $request->CATEGORY_ARTWORK,
+                'DESKRIPSI_ARTWORK' => $request->DESKRIPSI_ARTWORK,
+                'ARTIST_ARTWORK' => $request->ARTIST_ARTWORK,
+                'DATE_ARTWORK' => $request->DATE_ARTWORK,
             ]);
-
         } else {
+            // Update tanpa mengganti gambar
             $artwork->update([
-                'nama' => $request->input('nama'),
-                'kategori' => $request->input('kategori'),
-                'harga' => $request->input('harga'),
-                'deskripsi' => $request->input('deskripsi'),
-                'lokasi' => $request->input('lokasi'),
-                'stok' => $request->input('stok'),
-                'tgl_beli' => $request->input('tgl_beli'),
-                'tgl_masuk' => $request->input('tgl_masuk'),
+                'JUDUL_ARTWORK' => $request->JUDUL_ARTWORK,
+                'CATEGORY_ARTWORK' => $request->CATEGORY_ARTWORK,
+                'DESKRIPSI_ARTWORK' => $request->DESKRIPSI_ARTWORK,
+                'ARTIST_ARTWORK' => $request->ARTIST_ARTWORK,
+                'DATE_ARTWORK' => $request->DATE_ARTWORK,
             ]);
         }
 
-        return redirect()->route('artwork.index')->with(['success' => 'Data sukses diubah.']);
+        return redirect()->route('artwork.index')->with('success', 'Data berhasil diperbarui.');
     }
 
+    public function destroy($id)
+    {
+        // Cari user berdasarkan ID
+        $user = Artwork::findOrFail($id);
+
+        // Hapus user
+        $user->delete();
+
+        // Redirect dengan pesan sukses
+        return redirect()->route('artwork.index')->with('success', 'User berhasil dihapus.');
+    }
 }

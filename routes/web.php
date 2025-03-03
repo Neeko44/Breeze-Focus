@@ -13,11 +13,13 @@ Route::get('/', function () {
 });
 
 
-Route::resource('/artwork', artworkController::class);
+//Route::resource('/artwork', artworkController::class);
 
-Route::get('/artwork/create', [artworkController::class, 'create'])->name('artwork.create');
+Route::get('/artwork', [artworkController::class, 'index'])->name('artwork.index');
+Route::post('/artwork/create', [artworkController::class, 'create'])->name('artwork.create');
 Route::get('/artwork/{artwork}', [artworkController::class, 'show'])->name('artwork.show');
 Route::get('/artwork/{artwork}/edit', [artworkController::class, 'edit'])->name('artwork.edit');
+Route::delete('/artwork/{id}', [ProfileController::class, 'destroy'])->name('artwork.destroy');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

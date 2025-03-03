@@ -9,12 +9,14 @@ class artwork extends Model
 
     protected $table = 'artworks';
 
+    public $timestamps = false;
+
     protected $fillable = [
-        'judul_artwork',
-        'artist_artwork',
-        'deskripsi_artwork',
-        'date_artwork',
-        'kategori_artwork',
-        'image_artwork',
+        'JUDUL_ARTWORK',
+        'ARTIST_ARTWORK',
+        'DESKRIPSI_ARTWORK',
+        'DATE_ARTWORK',
+        'CATEGORY_ARTWORK',
+        'IMAGE_ARTWORK',
     ];
 }
